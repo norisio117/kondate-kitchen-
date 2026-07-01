@@ -1,0 +1,13 @@
+{
+  "name": "こんだてキッチン",
+  "short_name": "こんだて",
+  "description": "子育て家庭の1週間献立・買い物リスト・栄養バランス（取り分け＆ダイエット対応）",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff7f2",
+  "theme_color": "#ff8a5c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,0 +1,1011 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff8a5c">
+<title>こんだてキッチン｜子育て家庭の週間献立</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="こんだて">
+<style>
+  :root{
+    --bg:#fff7f2; --card:#ffffff; --ink:#3a2f2a; --sub:#9a8b80;
+    --accent:#ff8a5c; --accent2:#ffb86c; --line:#f0e3d8;
+    --green:#5bbf7b; --yellow:#f3b53b; --red:#ef6f6f; --blue:#5aa9e6;
+    --shadow:0 4px 16px rgba(180,120,90,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic UI",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;padding-bottom:90px}
+  header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+    padding:18px 16px 16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 12px rgba(255,138,92,.3)}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.02em}
+  header .sub{font-size:.78rem;opacity:.92;margin-top:2px}
+  main{max-width:760px;margin:0 auto;padding:14px}
+
+  /* タブ */
+  .tabbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
+    display:flex;z-index:30;box-shadow:0 -2px 12px rgba(0,0,0,.05);padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar button{flex:1;border:0;background:none;padding:9px 4px 7px;font-size:.7rem;color:var(--sub);
+    display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+  .tabbar button .ic{font-size:1.4rem;line-height:1}
+  .tabbar button.on{color:var(--accent);font-weight:700}
+  .page{display:none} .page.on{display:block;animation:fade .25s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--card);border-radius:16px;padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:12px;padding:11px 16px;
+    font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 3px 8px rgba(255,138,92,.3)}
+  .btn:active{transform:scale(.97)}
+  .btn.sub{background:#fff;color:var(--accent);border:1.5px solid var(--accent);box-shadow:none}
+  .btn.ghost{background:#f6ece4;color:var(--ink);box-shadow:none}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .grow{flex:1}
+
+  /* 設定スイッチ */
+  .toggle{display:flex;align-items:center;gap:8px;font-size:.9rem;cursor:pointer;
+    background:#f6ece4;padding:8px 12px;border-radius:20px}
+  .toggle input{display:none}
+  .toggle .knob{width:38px;height:22px;border-radius:20px;background:#d9cabe;position:relative;transition:.2s;flex:none}
+  .toggle .knob::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;
+    top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle input:checked + .knob{background:var(--green)}
+  .toggle input:checked + .knob::after{left:18px}
+
+  /* 曜日カード */
+  .day{margin-bottom:12px}
+  .day-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .day-badge{background:var(--accent);color:#fff;width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex:none}
+  .day-badge.sat{background:var(--blue)} .day-badge.sun{background:var(--red)}
+  .day-kcal{margin-left:auto;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:20px}
+  .kcal-low{background:#e8f7ed;color:var(--green)}
+  .kcal-mid{background:#fdf3dd;color:#c8941a}
+  .kcal-high{background:#fdeaea;color:var(--red)}
+
+  .dish{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-top:1px dashed var(--line)}
+  .dish:first-child{border-top:0}
+  .dish .tag{font-size:.68rem;color:#fff;padding:2px 7px;border-radius:6px;flex:none;margin-top:3px;font-weight:700}
+  .t-shu{background:#ef8a5c} .t-fuku{background:#7bc47f} .t-shiru{background:#5aa9e6} .t-plate{background:#b58adf}
+  .dish .nm{flex:1;font-size:.95rem;font-weight:600}
+  .dish .meta{font-size:.72rem;color:var(--sub);font-weight:400;display:block;margin-top:1px}
+  .dish .reroll{border:0;background:#f6ece4;border-radius:8px;padding:5px 8px;cursor:pointer;font-size:.8rem;flex:none}
+  .dish .reroll:active{transform:scale(.9)}
+
+  .balance{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+  .pill{font-size:.7rem;padding:3px 9px;border-radius:20px;background:#f1f1f1;color:#aaa}
+  .pill.ok{background:#e8f7ed;color:var(--green);font-weight:700}
+
+  details.tw{margin-top:6px}
+  details.tw summary{font-size:.78rem;color:var(--accent);cursor:pointer;list-style:none}
+  details.tw summary::-webkit-details-marker{display:none}
+  details.tw[open] summary{font-weight:700}
+  details.tw .body{font-size:.82rem;color:#7a6a5e;background:#fdf6f0;border-radius:10px;padding:8px 10px;margin-top:5px}
+
+  /* 買い物リスト */
+  .shop-grp{margin-bottom:14px}
+  .shop-grp h3{font-size:.92rem;margin:0 0 6px;padding-bottom:5px;border-bottom:2px solid var(--line)}
+  .shop-item{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid #f7efe8;cursor:pointer}
+  .shop-item input{width:20px;height:20px;accent-color:var(--green);flex:none}
+  .shop-item.done{opacity:.4;text-decoration:line-through}
+  .shop-item .amt{margin-left:auto;font-size:.82rem;color:var(--sub)}
+
+  .empty{text-align:center;color:var(--sub);padding:40px 20px;font-size:.9rem}
+  .empty .big{font-size:2.6rem;margin-bottom:8px}
+  .lead{font-size:.85rem;color:var(--sub);margin:0 0 12px}
+  h2.sec{font-size:1.05rem;margin:4px 0 10px;display:flex;align-items:center;gap:6px}
+
+  /* レシピ一覧 */
+  .filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:4px}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:5px 13px;font-size:.8rem;
+    white-space:nowrap;cursor:pointer;color:var(--sub)}
+  .chip.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+  .rcard{border-left:4px solid var(--accent);padding:10px 12px;margin-bottom:8px;background:#fff;
+    border-radius:0 12px 12px 0;box-shadow:var(--shadow)}
+  .rcard .rt{font-weight:700;font-size:.95rem}
+  .rcard .ri{font-size:.74rem;color:var(--sub);margin-top:2px}
+  .rtags span{font-size:.66rem;background:#f6ece4;color:#a08a7c;padding:1px 7px;border-radius:6px;margin-right:4px}
+  .note{font-size:.74rem;color:var(--sub);text-align:center;margin-top:10px}
+
+  /* アレルギー設定 */
+  .setlabel{font-size:.82rem;font-weight:700;margin:12px 0 6px;display:flex;align-items:center;gap:5px}
+  .algchips{display:flex;gap:6px;flex-wrap:wrap}
+  .algchip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:5px 12px;
+    font-size:.82rem;cursor:pointer;color:var(--sub)}
+  .algchip.on{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
+  .disc{font-size:.7rem;color:#b98e7a;background:#fdf1ea;border-radius:10px;padding:8px 10px;margin-top:8px;line-height:1.5}
+  .alg{display:inline-block;font-size:.66rem;background:#fdeaea;color:#d4615f;border:1px solid #f3cfcf;
+    padding:1px 6px;border-radius:6px;margin:2px 3px 0 0}
+  .alg.safe{background:#eef7ef;color:#5bbf7b;border-color:#cfe9d3}
+  .rcard.excluded{opacity:.4}
+  .rcard .exbadge{font-size:.66rem;background:var(--red);color:#fff;padding:1px 7px;border-radius:6px;margin-left:6px}
+  .t-asa{background:#f3a93b} .t-budget{background:#6bb36e}
+  .savemark{font-size:.66rem;color:#5a9e5d;font-weight:700;margin-left:5px}
+
+  /* 食費バナー */
+  .cost{background:linear-gradient(135deg,#6bb36e,#8ccf8e);color:#fff;border-radius:16px;padding:14px;
+    margin-bottom:12px;box-shadow:var(--shadow)}
+  .cost .big{font-size:1.7rem;font-weight:800;letter-spacing:.02em}
+  .cost .small{font-size:.74rem;opacity:.92}
+  /* 月齢セレクト */
+  .agesel{width:100%;padding:9px 10px;border-radius:10px;border:1.5px solid var(--line);
+    font-size:.9rem;background:#fff;color:var(--ink);margin-top:6px}
+  .agetip{background:#fef6ee;border-radius:12px;padding:10px 12px;margin-top:8px;font-size:.82rem}
+  .agetip b{color:var(--accent)}
+  .agetip .gline{margin-top:3px}
+  /* 余り物検索 */
+  .fridge{width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);
+    font-size:.9rem;margin-bottom:8px;background:#fff;color:var(--ink)}
+  .matchbadge{font-size:.66rem;background:#6bb36e;color:#fff;padding:1px 7px;border-radius:6px;margin-left:6px}
+
+  /* ロック・お気に入り */
+  .dish .lock{border:0;background:#f6ece4;border-radius:8px;padding:5px 7px;cursor:pointer;font-size:.8rem;flex:none}
+  .dish .lock.on{background:#ffe1cf}
+  .dish.locked{background:#fff6ef;border-radius:10px;padding-left:6px}
+  .fav{border:0;background:none;cursor:pointer;font-size:1.2rem;line-height:1;color:#d9c4b6;float:right}
+  .fav.on{color:#ef6f6f}
+  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#3a2f2a;color:#fff;
+    padding:9px 16px;border-radius:20px;font-size:.85rem;opacity:0;transition:.3s;z-index:50;pointer-events:none}
+  .toast.show{opacity:.95}
+
+  /* 印刷用 */
+  @media print{
+    header,.tabbar,.btn,.cost .small,.reroll,.lock,.fav,.filter,.fridge,.lead,.setlabel,.algchips,.disc,.agesel,.agetip,#ageTip{display:none!important}
+    body{padding:0;background:#fff}
+    .page{display:none!important} .page.on{display:block!important}
+    .card,.shop-grp{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+    .shop-item{cursor:default}
+  }
+</style>
+
+<header>
+  <h1>🍳 こんだてキッチン</h1>
+  <div class="sub" id="headSub">子育て家庭の1週間献立 ・ 取り分け＆ダイエット対応</div>
+</header>
+
+<main>
+  <!-- ========== 献立ページ ========== -->
+  <section class="page on" id="p-plan">
+    <div class="card" id="moodCard">
+      <h2 class="sec" style="margin:0 0 8px">🍽 今日の気分で選ぶ</h2>
+      <p class="lead" style="margin:0 0 8px">食べたいジャンルをタップ → その気分の一品をパッと提案します。</p>
+      <div class="filter" id="moodChips"></div>
+      <div id="moodResult"></div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <button class="btn grow" id="gen">✨ 1週間の献立を作る</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label class="toggle">
+          <input type="checkbox" id="dietMode" checked>
+          <span class="knob"></span><span>🥗 ダイエット配慮</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="budgetMode">
+          <span class="knob"></span><span>💰 節約重視</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="avoidRep" checked>
+          <span class="knob"></span><span>🔁 前回と被らせない</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="soloMode">
+          <span class="knob"></span><span>👤 ひとり暮らしモード</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="learnMode" checked>
+          <span class="knob"></span><span>🎯 好みに合わせる</span>
+        </label>
+      </div>
+      <div id="tasteHint" class="lead" style="margin:8px 0 0"></div>
+
+      <div class="setlabel">👨‍👩‍👧‍👦 何人分で作る（材料・食費を換算）</div>
+      <select class="agesel" id="servSel"></select>
+
+      <div class="setlabel">🚫 アレルギー除外（含む料理を提案しない）</div>
+      <div class="algchips" id="algChips"></div>
+      <div class="disc">
+        ⚠️ アレルギー判定は<b>材料名からの簡易推定</b>です。しょうゆ等の調味料に含まれる微量成分や、
+        製品ごとの違い・製造ラインの混入までは判定できません。<b>重いアレルギーの場合は必ず実際の原材料表示と医師の指示を確認</b>してください。
+      </div>
+
+      <div class="setlabel">🙅 苦手な食材（その食材を使う料理を出さない）</div>
+      <input class="fridge" id="dislikeInput" style="margin-bottom:0" placeholder="例：ピーマン しいたけ（空白や読点で区切る）">
+
+      <div id="ageBox">
+      <div class="setlabel">👶 お子さんの月齢（取り分けガイド）</div>
+      <select class="agesel" id="ageSel"></select>
+      <div id="ageTip"></div>
+      </div>
+
+      <div class="setlabel">💾 データのバックアップ</div>
+      <div class="row">
+        <button class="btn sub grow" id="exportBtn">書き出し</button>
+        <button class="btn sub grow" id="importBtn">読み込み</button>
+        <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+      </div>
+
+      <p class="lead" style="margin:10px 0 0">
+        主菜・副菜・汁物を自動で組み合わせます。<b>🔄</b>＝1品だけ作り直し、
+        <b>🔒</b>＝気に入った料理を固定（もう一度「作る」を押しても残ります）。
+        料理名タップで取り分けメモが開きます。
+      </p>
+    </div>
+    <div id="week"></div>
+  </section>
+
+  <!-- ========== 朝食ページ ========== -->
+  <section class="page" id="p-asa">
+    <h2 class="sec">🌅 朝食アイデア</h2>
+    <p class="lead">忙しい朝でも作れる、子育て家庭向けの朝ごはん。1週間分をシャッフル提案します（買い物リストには含めません）。</p>
+    <div class="card">
+      <button class="btn grow" id="genAsa" style="width:100%">🌅 1週間の朝食を提案</button>
+    </div>
+    <div id="asaList"></div>
+  </section>
+
+  <!-- ========== 買い物リストページ ========== -->
+  <section class="page" id="p-shop">
+    <h2 class="sec">🛒 買い物リスト</h2>
+    <p class="lead">今週の献立から必要な食材を自動集計。タップでチェック、まとめてコピー・印刷もできます。</p>
+    <div class="card">
+      <div class="row">
+        <button class="btn sub grow" id="copyShop">📋 コピー</button>
+        <button class="btn sub grow" id="printShop">🖨 印刷</button>
+        <button class="btn ghost grow" id="uncheckAll">チェック解除</button>
+      </div>
+    </div>
+    <div id="shopList"></div>
+  </section>
+
+  <!-- ========== 栄養ページ ========== -->
+  <section class="page" id="p-nutri">
+    <h2 class="sec">🍀 栄養バランスの目安</h2>
+    <p class="lead">1日の夕食ごとの目安。あくまで「ざっくり」の参考です。</p>
+    <div id="nutri"></div>
+  </section>
+
+  <!-- ========== レシピ集ページ ========== -->
+  <section class="page" id="p-recipe">
+    <h2 class="sec">📖 レシピ集</h2>
+    <input class="fridge" id="fridge" placeholder="🧊 冷蔵庫の余り物で探す（例：なす 豚 たまご）" style="margin-bottom:6px">
+    <div class="row" style="margin-bottom:10px"><button class="btn sub grow" id="comboBtn">🍳 この食材で献立を組む</button></div>
+    <div id="comboResult"></div>
+    <div class="filter" id="rFilter"></div>
+    <div id="recipeList"></div>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button class="on" data-p="p-plan"><span class="ic">📅</span>献立</button>
+  <button data-p="p-asa"><span class="ic">🌅</span>朝食</button>
+  <button data-p="p-shop"><span class="ic">🛒</span>買い物</button>
+  <button data-p="p-nutri"><span class="ic">🍀</span>栄養</button>
+  <button data-p="p-recipe"><span class="ic">📖</span>レシピ</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="recipes.js"></script>
+<script>
+/* ===================== ストレージ ===================== */
+const KEY="kondate_v1";
+let state = load();
+function load(){
+  const def={week:null, diet:true, budget:false, allergy:[], breakfast:null, checked:{}, stage:"none", locked:[], favorites:[], servings:4, avoidRepeat:true, history:[], dislikes:[], solo:false, learn:true};
+  try{ return Object.assign(def, JSON.parse(localStorage.getItem(KEY))||{}); }
+  catch(e){ return def; }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+const DAYS=["月","火","水","木","金","土","日"];
+const byCat = c => RECIPES.filter(r=>r.cat===c);
+
+/* ===================== アレルギー判定 ===================== */
+function detectAllergens(r){
+  const text=(r.ing||[]).map(i=>i.n).join(",");
+  return ALLERGENS.filter(a=>a.kw.some(k=>text.includes(k))).map(a=>a.key);
+}
+function allergenLabels(r){
+  return detectAllergens(r).map(k=>(ALLERGENS.find(a=>a.key===k)||{}).label).filter(Boolean);
+}
+function hasExcludedAllergen(r){
+  if(!state.allergy||!state.allergy.length) return false;
+  const det=detectAllergens(r);
+  return state.allergy.some(k=>det.includes(k));
+}
+/* 苦手な食材（材料名・料理名に含むものを除外） */
+function hasDisliked(r){
+  const d=state.dislikes||[]; if(!d.length) return false;
+  const text=(r.ing||[]).map(i=>i.n).join(",")+","+(r.name||"");
+  return d.some(t=>text.includes(t));
+}
+function isExcluded(r){ return hasExcludedAllergen(r) || hasDisliked(r); }
+
+/* 料理の絵文字アイコン（名前・材料から推定） */
+function recipeEmoji(r){
+  const n=r.name||"";
+  const has=k=>n.includes(k)||(r.ing||[]).some(i=>i.n.includes(k));
+  if(n.includes("カレー")) return "🍛";
+  if(n.includes("パスタ")||has("スパゲ")||n.includes("ミートソース")) return "🍝";
+  if(n.includes("うどん")) return "🍜";
+  if(n.includes("丼")||n.includes("ちらし")||n.includes("釜めし")||n.includes("おにぎり")||n.includes("混ぜ")||n.includes("炒飯")||n.includes("そぼろ")) return "🍚";
+  if(n.includes("味噌汁")||n.includes("スープ")||n.includes("汁")||n.includes("ポタージュ")||n.includes("鍋")||n.includes("ミネストローネ")||n.includes("つみれ")) return "🍲";
+  if(n.includes("トースト")||n.includes("サンド")||n.includes("ホットケーキ")||n.includes("フレンチ")||(n.includes("パン")&&!n.includes("パン粉"))) return "🍞";
+  if(n.includes("ヨーグルト")) return "🥛";
+  if(n.includes("サラダ")||n.includes("ラペ")||n.includes("和え")||n.includes("なます")||n.includes("浸し")||n.includes("温野菜")) return "🥗";
+  if(has("鮭")||has("ぶり")||has("さば")||has("たら")||has("あじ")||has("かじき")||has("いわし")||has("しらす")||(r.tags&&r.tags.includes("さかな"))) return "🐟";
+  if(has("えび")) return "🍤";
+  if(n.includes("ハンバーグ")) return "🍔";
+  if(has("豆腐")||has("厚揚げ")||has("納豆")) return "🥢";
+  if(has("鶏")||has("ささみ")) return "🍗";
+  if(has("豚")||has("ベーコン")||has("ハム")||has("ウインナー")) return "🥓";
+  if(has("牛")) return "🥩";
+  if(has("卵")) return "🥚";
+  return {shu:"🍖",fuku:"🥬",shiru:"🍲",plate:"🍱"}[r.cat]||"🍽️";
+}
+
+/* 料理のジャンル（明示のgenre優先、なければ名前・タグから推定） */
+const GENRES=[["wa","🍚和食"],["yo","🍞洋食"],["it","🍝イタリアン"],["ch","🥟中華"],["kr","🌶️韓国"],["et","🍛エスニック"]];
+function recipeGenre(r){
+  if(r.genre) return r.genre;
+  const n=r.name||"", t=r.tags||[];
+  const has=k=>n.includes(k);
+  if(t.includes("イタリアン")||has("パスタ")||has("スパゲ")||has("ペンネ")||has("リゾット")||has("ペペロン")||has("ボロネーゼ")||has("カルボ")||has("ミネストローネ")||has("アヒージョ")||has("ジェノベ")) return "it";
+  if(t.includes("中華")||has("麻婆")||has("青椒")||has("回鍋")||has("餃子")||has("炒飯")||has("チャーハン")||has("エビチリ")||has("八宝")||has("バンバン")||has("油淋")||has("酢豚")) return "ch";
+  if(t.includes("韓国")||has("キムチ")||has("チヂミ")||has("ビビン")||has("プルコギ")||has("チゲ")||has("ナムル")||has("タッカルビ")||has("キンパ")||has("ヤンニョム")) return "kr";
+  if(t.includes("エスニック")||has("ガパオ")||has("フォー")||has("タイ")||has("ナシゴレン")||has("タンドリー")||has("カオマンガイ")||has("トムヤム")||has("ベトナム")||(has("グリーン")&&has("カレー"))) return "et";
+  if(t.includes("洋")||has("グラタン")||has("シチュー")||has("ハンバーグ")||has("オムライス")||has("ポトフ")||has("ソテー")||has("マリネ")||has("ラペ")||has("ステーキ")) return "yo";
+  return "wa";
+}
+function genreLabel(k){ const g=GENRES.find(x=>x[0]===k); return g?g[1]:"🍚和食"; }
+
+/* 好み学習：❤️お気に入りからジャンル・タグの傾向を集計し、献立生成の重みに反映 */
+function tasteScores(){
+  const g={}, tg={};
+  (state.favorites||[]).forEach(id=>{
+    const r=RECIPES.find(x=>x.id===id); if(!r) return;
+    const ge=recipeGenre(r); g[ge]=(g[ge]||0)+1;
+    (r.tags||[]).forEach(t=>tg[t]=(tg[t]||0)+1);
+  });
+  return {g,tg};
+}
+function renderTasteHint(){
+  const el=document.getElementById("tasteHint"); if(!el) return;
+  const favs=state.favorites||[];
+  if(!state.learn){ el.textContent=""; return; }
+  if(!favs.length){ el.textContent="🎯 レシピ集で❤️お気に入りを登録すると、その傾向（好きなジャンルなど）を毎週の献立に反映します。"; return; }
+  const {g}=tasteScores();
+  const top=Object.entries(g).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>genreLabel(k)).join("・");
+  el.textContent=`🎯 好み学習中：❤️${favs.length}件から「${top}」の傾向を献立に反映しています。`;
+}
+
+/* 今日の気分で選ぶ（ジャンル別クイック提案） */
+let moodGenre=null;
+function renderMoodChips(){
+  const box=document.getElementById("moodChips"); if(!box) return;
+  box.innerHTML=GENRES.map(([k,l])=>`<div class="chip ${moodGenre===k?'on':''}" data-k="${k}">${l}</div>`).join("");
+  box.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ moodGenre=c.dataset.k; renderMoodChips(); pickMood(); });
+}
+function pickMood(){
+  const el=document.getElementById("moodResult"); if(!el) return;
+  if(!moodGenre){ el.innerHTML=""; return; }
+  const pool=RECIPES.filter(r=>(r.cat==="shu"||r.cat==="plate")&&recipeGenre(r)===moodGenre&&!isExcluded(r));
+  if(!pool.length){ el.innerHTML=`<div class="lead" style="margin-top:8px">「${genreLabel(moodGenre)}」の主菜はまだありません。レシピ集で探してみてください。</div>`; return; }
+  const r=pool[Math.floor(Math.random()*pool.length)];
+  el.innerHTML=`<div class="rcard" style="margin-top:10px;border-left-color:var(--accent2)">
+    <div class="rt">${recipeEmoji(r)} ${r.name}
+      <button class="reroll" style="float:right" onclick="pickMood()" title="別の料理にする">🔄 別の</button></div>
+    <div class="ri">${genreLabel(moodGenre)} ・ ${CAT_LABEL[r.cat]} ・ 約${r.kcal}kcal/人 ・ ${r.time}分</div>
+    <div class="rtags" style="margin-top:4px">${r.tags.map(t=>`<span>${t}</span>`).join("")}</div>
+    <details class="tw" open><summary>材料・作り方</summary>
+      <div class="body"><b>材料(4人分)：</b>${r.ing.map(i=>i.n+" "+fmtAmt(i.a,i.u)).join("、")}${stepsHtml(r.id)}</div></details>
+  </div>`;
+}
+/* ひとり暮らしモードの見た目切替 */
+function applySolo(){
+  const sub=document.getElementById("headSub");
+  if(sub) sub.textContent = state.solo ? "ひとり暮らしの献立 ・ 作り置き＆ヘルシー対応" : "子育て家庭の1週間献立 ・ 取り分け＆ダイエット対応";
+  const ab=document.getElementById("ageBox"); if(ab) ab.style.display = state.solo ? "none" : "";
+}
+function twLabel(){ return state.solo ? "📝 作り方・保存メモ" : "👶 取り分けメモ・作り方"; }
+
+/* 調理手順のHTML */
+function stepsHtml(id){
+  const s=STEPS[id]; if(!s||!s.length) return "";
+  return `<div style="margin-top:7px"><b>📝 作り方</b><ol style="margin:3px 0 0;padding-left:1.3em">${s.map(x=>`<li>${x}</li>`).join("")}</ol></div>`;
+}
+
+/* ===================== 節約判定 ===================== */
+const CHEAP_KW=["もやし","豆腐","厚揚げ","油揚げ","鶏むね","ひき肉","卵","ツナ","さば缶","さば水煮","ちくわ","はんぺん","キャベツ","大根","こんにゃく","春雨","切り干し","おから","じゃがいも","玉ねぎ","にんじん","白菜","小松菜"];
+function isBudget(r){
+  if(r.tags && r.tags.includes("節約")) return true;
+  const text=(r.ing||[]).map(i=>i.n).join(",");
+  return CHEAP_KW.filter(k=>text.includes(k)).length>=2;
+}
+
+/* ===================== 献立生成 ===================== */
+function pick(pool, used){
+  if(!pool || !pool.length) return null;
+  const fresh = pool.filter(r=>!used.has(r.id));
+  const src = fresh.length ? fresh : pool;
+  const r = src[Math.floor(Math.random()*src.length)];
+  used.add(r.id);
+  return r;
+}
+function weightPool(pool){
+  const diet=state.diet, budget=state.budget, favs=state.favorites||[], solo=state.solo;
+  if(!diet && !budget && !favs.length && !solo) return pool;
+  const ts = state.learn ? tasteScores() : null; // 好み学習（お気に入りの傾向）
+  const w=[];
+  pool.forEach(r=>{
+    let n=1;
+    if(diet){
+      if(r.kcal<=250) n+=2;
+      if(r.tags.includes("ヘルシー")) n+=1;
+      if(r.tags.includes("野菜たっぷり")) n+=1;
+      if(r.kcal>=320) n=Math.max(1,n-1);
+    }
+    if(budget && isBudget(r)) n+=2;
+    if(solo){ ["作り置き","お弁当","時短","ヘルシー"].forEach(tg=>{ if((r.tags||[]).includes(tg)) n+=1; }); } // ひとり暮らしは作り置き・弁当向きを優先
+    if(ts){ // お気に入りが多いジャンル・タグの料理を出やすく（新しい料理にも波及）
+      n += Math.min(3, ts.g[recipeGenre(r)]||0);
+      let tb=0; (r.tags||[]).forEach(t=>tb+=(ts.tg[t]||0)); n += Math.min(2, tb);
+    }
+    if(favs.includes(r.id)) n+=2; // お気に入りそのものは特に出やすく
+    for(let i=0;i<n;i++) w.push(r);
+  });
+  return w;
+}
+// 直近に使った料理ID（前回との被り回避用。generateWeek開始時に設定）
+let RECENT=new Set();
+// アレルギー除外＋前回被り回避を適用したカテゴリ別プール
+function poolOf(cat){
+  let base = byCat(cat).filter(r=>!isExcluded(r));
+  if(RECENT.size){
+    const fresh = base.filter(r=>!RECENT.has(r.id));
+    if(fresh.length >= Math.min(5, base.length)) base = fresh; // 十分残るなら被りを避ける
+  }
+  return weightPool(base);
+}
+function isLocked(d,id){ return (state.locked||[]).includes(d+"|"+id); }
+function toggleLock(d,id){
+  const key=d+"|"+id, i=state.locked.indexOf(key);
+  if(i>=0) state.locked.splice(i,1); else state.locked.push(key);
+  save(); renderWeek();
+}
+function generateWeek(){
+  const diet = state.diet;
+  const old = state.week || [];
+  // 前回と被らせない：履歴（直近最大2週）の料理IDを避ける
+  RECENT = state.avoidRepeat ? new Set((state.history||[]).flat()) : new Set();
+  const usedMain=new Set(), usedFuku=new Set(), usedShiru=new Set();
+  // 固定中の料理を先に「使用済み」に登録（重複回避）
+  old.forEach((dy,d)=>dy.items.forEach(it=>{
+    if(it.id!=="_rice" && isLocked(d,it.id)){
+      if(it.cat==="shu"||it.cat==="plate") usedMain.add(it.id);
+      else if(it.cat==="fuku") usedFuku.add(it.id);
+      else if(it.cat==="shiru") usedShiru.add(it.id);
+    }
+  }));
+  const platePool = poolOf("plate"), shuPool = poolOf("shu"), fukuPool = poolOf("fuku"), shiruPool = poolOf("shiru");
+  const lockedOfDay=(d,cat)=>(old[d]?old[d].items:[]).filter(it=>it.id!=="_rice"&&it.cat===cat&&isLocked(d,it.id));
+  // 固定があればそれを、無ければ抽選
+  const slot=(d,cat,pool,used)=>{ const lk=lockedOfDay(d,cat); return lk.length ? lk[0] : pick(pool,used); };
+  const week=[];
+  for(let d=0; d<7; d++){
+    const usePlate = (d===2 || d===5) && platePool.length;
+    const day={day:d, items:[]};
+    if(usePlate){
+      day.items.push(slot(d,"plate",platePool,usedMain));
+      day.items.push(slot(d,"fuku",fukuPool,usedFuku));
+      day.items.push(slot(d,"shiru",shiruPool,usedShiru));
+    }else{
+      day.items.push(slot(d,"shu",shuPool,usedMain));
+      const targetFuku=(diet && d%2===0)?2:1;
+      lockedOfDay(d,"fuku").slice(0,targetFuku).forEach(it=>{ day.items.push(it); usedFuku.add(it.id); });
+      while(day.items.filter(x=>x&&x.cat==="fuku").length<targetFuku){
+        const p=pick(fukuPool,usedFuku); if(!p) break; day.items.push(p);
+      }
+      day.items.push(slot(d,"shiru",shiruPool,usedShiru));
+      day.items.push({id:"_rice", name:"ごはん", cat:"stap", kcal:diet?180:250, time:0, tags:[], ing:[{n:"ごはん",a:4,u:"杯",g:"stap"}], torrwake:"幼児はおにぎりや軟飯に。離乳食は月齢に合わせた軟らかさで。"});
+    }
+    day.items = day.items.filter(Boolean);
+    week.push(day);
+  }
+  state.week = week;
+  state.checked = {};
+  // 履歴に今週の料理IDを記録（直近2週分だけ保持）
+  const ids = week.flatMap(d=>d.items.filter(it=>it.id!=="_rice").map(it=>it.id));
+  state.history = [...(state.history||[]), ids].slice(-2);
+  save();
+}
+function rerollDish(dayIdx, itemIdx){
+  const item = state.week[dayIdx].items[itemIdx];
+  if(item.id==="_rice") return;
+  const cat = item.cat;
+  // 作り直したら、その料理の固定は解除
+  const lk=state.locked.indexOf(dayIdx+"|"+item.id);
+  if(lk>=0) state.locked.splice(lk,1);
+  // 週内の同カテゴリ使用中IDを集める（重複回避）
+  const used=new Set();
+  state.week.forEach(dy=>dy.items.forEach(it=>{ if(it.cat===cat) used.add(it.id); }));
+  const pool = poolOf(cat);
+  if(!pool.length) return;
+  const fresh = pool.filter(r=>!used.has(r.id));
+  const src = fresh.length ? fresh : pool.filter(r=>r.id!==item.id);
+  const s = src.length ? src : pool;
+  state.week[dayIdx].items[itemIdx] = s[Math.floor(Math.random()*s.length)];
+  save(); renderWeek(); renderNutri();
+}
+
+/* ===================== 朝食生成 ===================== */
+function genBreakfast(){
+  const pool = BREAKFAST.filter(r=>!isExcluded(r));
+  const src = pool.length ? pool : BREAKFAST;
+  const used=new Set(); const wk=[];
+  for(let d=0; d<7; d++){
+    const fresh=src.filter(r=>!used.has(r.id));
+    const s=fresh.length?fresh:src;
+    const r=s[Math.floor(Math.random()*s.length)];
+    used.add(r.id);
+    wk.push({day:d, item:r});
+  }
+  state.breakfast=wk; save();
+}
+function rerollBreakfast(di){
+  const pool=BREAKFAST.filter(r=>!isExcluded(r));
+  if(!pool.length) return;
+  const used=new Set(state.breakfast.map(b=>b.item.id));
+  const cur=state.breakfast[di].item.id;
+  const fresh=pool.filter(r=>!used.has(r.id));
+  const src=fresh.length?fresh:pool.filter(r=>r.id!==cur);
+  const s=src.length?src:pool;
+  state.breakfast[di].item=s[Math.floor(Math.random()*s.length)];
+  save(); renderBreakfast();
+}
+
+/* ===================== アレルギー表示ヘルパー ===================== */
+function algLine(r){
+  const labs=allergenLabels(r);
+  if(!labs.length) return "";
+  return `<br><b>含む(推定)：</b>${labs.join("・")}`;
+}
+function algBadges(r){
+  const labs=allergenLabels(r);
+  if(!labs.length) return `<span class="alg safe">特定原材料の推定なし</span>`;
+  return labs.map(l=>`<span class="alg">${l}</span>`).join("");
+}
+
+/* ===================== 描画：献立 ===================== */
+function renderWeek(){
+  const el=document.getElementById("week");
+  if(!state.week){
+    el.innerHTML=`<div class="empty"><div class="big">🍽️</div>
+      「1週間の献立を作る」を押すと<br>月〜日の夕食メニューが並びます。</div>`;
+    return;
+  }
+  el.innerHTML = state.week.map((dy,di)=>{
+    const sat = dy.day===5, sun = dy.day===6;
+    const kcal = dy.items.reduce((s,it)=>s+it.kcal,0);
+    let kc="kcal-mid", lab="標準";
+    if(kcal<=650){kc="kcal-low";lab="控えめ";} else if(kcal>820){kc="kcal-high";lab="高め";}
+    const dishes = dy.items.map((it,ii)=>{
+      if(it.id==="_rice"){
+        return `<div class="dish"><span class="tag" style="background:#c7a98a">主食</span>
+          <div class="nm">${it.name}<span class="meta">約${it.kcal}kcal/人</span></div></div>`;
+      }
+      const tcls = {shu:"t-shu",fuku:"t-fuku",shiru:"t-shiru",plate:"t-plate"}[it.cat];
+      const lk = isLocked(di, it.id);
+      return `<div class="dish${lk?' locked':''}">
+        <span class="tag ${tcls}">${CAT_LABEL[it.cat]}</span>
+        <div class="nm">${recipeEmoji(it)} ${it.name}
+          <span class="meta">約${it.kcal}kcal/人 ・ ${it.time}分${it.tags.length?" ・ "+it.tags.slice(0,2).join("・"):""}</span>
+          <details class="tw"><summary>${twLabel()}</summary><div class="body">${it.torrwake}${algLine(it)}${stepsHtml(it.id)}</div></details>
+        </div>
+        <button class="lock ${lk?'on':''}" onclick="toggleLock(${di},'${it.id}')" title="固定（作り直しても残す）">${lk?'🔒':'🔓'}</button>
+        <button class="reroll" onclick="rerollDish(${di},${ii})" title="この料理だけ作り直す">🔄</button>
+      </div>`;
+    }).join("");
+    return `<div class="card day">
+      <div class="day-head">
+        <div class="day-badge ${sat?'sat':''}${sun?'sun':''}">${DAYS[dy.day]}</div>
+        <b>${DAYS[dy.day]}曜日の夕食</b>
+        <span class="day-kcal ${kc}">${kcal}kcal/人 ・ ${lab}</span>
+      </div>${dishes}</div>`;
+  }).join("");
+}
+
+/* ===================== 描画：買い物リスト ===================== */
+function aggregateIngredients(){
+  // {group: {key:{n,u,a,g}}}　※ 何人分かに応じて分量を換算（基準4人分）
+  const map={};
+  if(!state.week) return map;
+  const scale = (state.servings||4)/4;
+  state.week.forEach(dy=>dy.items.forEach(it=>{
+    (it.ing||[]).forEach(ig=>{
+      const key = ig.n+"|"+ig.u;
+      if(!map[ig.g]) map[ig.g]={};
+      if(!map[ig.g][key]) map[ig.g][key]={n:ig.n,u:ig.u,a:0,g:ig.g};
+      map[ig.g][key].a += ig.a*scale;
+    });
+  }));
+  return map;
+}
+function fmtAmt(a,u){
+  const r = Math.round(a*10)/10;
+  return (Number.isInteger(r)? r : r) + u;
+}
+
+/* 食材1行の概算価格（円）
+   ※ 価格表は「単位が一致したときだけ」使う。
+      （例：白菜は"玉"の値段なので、グラム指定の白菜には使わず概算に回す） */
+function unitMatch(per,u){
+  if(per==="g") return u==="g";
+  if(per==="ml") return u==="ml";
+  return per===u; // 本・個・玉などは完全一致のみ採用
+}
+function priceLine(ig){
+  const u=ig.u;
+  const hit = PRICE_LIST.find(p=>ig.n.includes(p.kw) && unitMatch(p.per,u));
+  if(hit) return hit.yen * ig.a;
+  // 該当なし → グループ＋単位から概算
+  if(["大さじ","小さじ","少々","かけ","式"].includes(u)) return 5*ig.a; // 調味料少量
+  if(u==="g"){ const g={meat:1.2,veg:0.4,stap:0.8,egg:0.6,other:0.8,season:0.5}[ig.g]||0.6; return g*ig.a; }
+  if(u==="ml") return 0.2*ig.a;
+  const each={veg:60,meat:120,egg:40,stap:45,other:110,season:150}[ig.g]||80;
+  return each*ig.a;
+}
+function weeklyCost(){
+  const map=aggregateIngredients();
+  let total=0;
+  Object.values(map).forEach(grp=>Object.values(grp).forEach(ig=>{ total+=priceLine(ig); }));
+  return Math.round(total);
+}
+function yen(n){ return "¥"+n.toLocaleString("ja-JP"); }
+
+function renderShop(){
+  const el=document.getElementById("shopList");
+  if(!state.week){ el.innerHTML=`<div class="empty"><div class="big">🛒</div>先に「献立」を作ってください。</div>`; return; }
+  const map=aggregateIngredients();
+  const cost=weeklyCost();
+  const sv=state.servings||4;
+  const costCard=`<div class="cost">
+    <div class="small">今週の夕食 食材費の目安（${sv}人分×7日）</div>
+    <div class="big">約${yen(cost)}</div>
+    <div class="small">1日あたり 約${yen(Math.round(cost/7))} ・ 1人1食 約${yen(Math.round(cost/(sv*7)))}</div>
+    <div class="small" style="margin-top:5px">※ 地域・店・時期で変わるおおよその目安です。調味料など常備品は少額計上。</div>
+  </div>`;
+  const order=["veg","meat","egg","stap","season","other"];
+  el.innerHTML = costCard + order.filter(g=>map[g]).map(g=>{
+    const items = Object.values(map[g]).sort((a,b)=>a.n.localeCompare(b.n,'ja'));
+    return `<div class="card shop-grp"><h3>${ING_GROUPS[g]}</h3>${
+      items.map(it=>{
+        const id = it.n+"|"+it.u;
+        const done = state.checked[id];
+        return `<label class="shop-item ${done?'done':''}" data-id="${id}">
+          <input type="checkbox" ${done?'checked':''}>
+          <span>${it.n}</span><span class="amt">${fmtAmt(it.a,it.u)}</span></label>`;
+      }).join("")
+    }</div>`;
+  }).join("");
+  el.querySelectorAll(".shop-item").forEach(node=>{
+    node.addEventListener("click",e=>{
+      e.preventDefault();
+      const id=node.dataset.id;
+      state.checked[id]=!state.checked[id];
+      save();
+      node.classList.toggle("done",state.checked[id]);
+      node.querySelector("input").checked=state.checked[id];
+    });
+  });
+}
+
+/* ===================== 描画：栄養バランス ===================== */
+function renderNutri(){
+  const el=document.getElementById("nutri");
+  if(!state.week){ el.innerHTML=`<div class="empty"><div class="big">🍀</div>先に「献立」を作ってください。</div>`; return; }
+  el.innerHTML = state.week.map(dy=>{
+    const cats = new Set(dy.items.map(it=>it.cat==="plate"?["shu","stap"]:it.cat).flat());
+    const hasStap = cats.has("stap")||dy.items.some(it=>it.cat==="plate"||it.id==="_rice");
+    const hasShu = cats.has("shu")||dy.items.some(it=>it.cat==="plate");
+    const fukuCount = dy.items.filter(it=>it.cat==="fuku").length;
+    const hasShiru = cats.has("shiru");
+    const vegRich = dy.items.some(it=>it.tags&&it.tags.includes("野菜たっぷり")) || fukuCount>=2;
+    const fish = dy.items.some(it=>it.tags&&it.tags.includes("さかな"));
+    const kcal = dy.items.reduce((s,it)=>s+it.kcal,0);
+    const pill=(ok,txt)=>`<span class="pill ${ok?'ok':''}">${ok?'✓':'·'} ${txt}</span>`;
+    let advice="";
+    if(state.diet && kcal>820) advice="⚠️ カロリー高め。主菜を軽めに変えるか、ごはんを少なめに。";
+    else if(!vegRich) advice="🥬 野菜が少なめ。副菜を1品足すと◎。";
+    else advice="👍 バランス良好です。";
+    return `<div class="card">
+      <b>${DAYS[dy.day]}曜日</b>
+      <span class="day-kcal ${kcal<=650?'kcal-low':kcal>820?'kcal-high':'kcal-mid'}" style="float:right">${kcal}kcal/人</span>
+      <div class="balance">
+        ${pill(hasStap,"主食")}${pill(hasShu,"主菜(たんぱく質)")}
+        ${pill(fukuCount>=1,"副菜"+(fukuCount>=2?"×2":""))}${pill(hasShiru,"汁物")}
+        ${pill(vegRich,"野菜たっぷり")}${pill(fish,"魚の日")}
+      </div>
+      <div style="font-size:.8rem;color:var(--sub);margin-top:8px">${advice}</div>
+    </div>`;
+  }).join("");
+  // 週まとめ
+  const fishDays = state.week.filter(dy=>dy.items.some(it=>it.tags&&it.tags.includes("さかな"))).length;
+  const avg = Math.round(state.week.reduce((s,dy)=>s+dy.items.reduce((a,it)=>a+it.kcal,0),0)/7);
+  el.insertAdjacentHTML("beforeend",
+    `<div class="card" style="background:#fdf6f0">
+      <b>📊 今週のまとめ</b>
+      <div style="font-size:.86rem;margin-top:6px">
+        ・夕食の平均カロリー：<b>約${avg}kcal/人</b>（${avg<=650?"控えめ◎":avg>820?"やや高め":"標準"}）<br>
+        ・魚の日：<b>${fishDays}日</b>（週2〜3日が目安）<br>
+        ・ダイエット配慮：<b>${state.diet?"ON":"OFF"}</b>
+      </div>
+    </div>`);
+}
+
+/* ===================== 描画：朝食 ===================== */
+function renderBreakfast(){
+  const el=document.getElementById("asaList");
+  if(!state.breakfast){
+    el.innerHTML=`<div class="empty"><div class="big">🌅</div>
+      「1週間の朝食を提案」を押すと<br>月〜日の朝ごはん候補が並びます。</div>`;
+    return;
+  }
+  el.innerHTML = state.breakfast.map((b,di)=>{
+    const sat=b.day===5, sun=b.day===6;
+    const it=b.item;
+    return `<div class="card day">
+      <div class="day-head">
+        <div class="day-badge ${sat?'sat':''}${sun?'sun':''}">${DAYS[b.day]}</div>
+        <b>${DAYS[b.day]}曜日の朝食</b>
+        <button class="reroll" style="margin-left:auto" onclick="rerollBreakfast(${di})" title="作り直す">🔄</button>
+      </div>
+      <div class="dish">
+        <span class="tag t-asa">朝</span>
+        <div class="nm">${recipeEmoji(it)} ${it.name}
+          <span class="meta">約${it.kcal}kcal/人 ・ ${it.time}分${it.tags.length?" ・ "+it.tags.slice(0,2).join("・"):""}</span>
+          <details class="tw"><summary>${twLabel()}</summary><div class="body">${it.torrwake}${algLine(it)}${stepsHtml(it.id)}</div></details>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ===================== 描画：レシピ集 ===================== */
+let rFilter="all";
+const FILTERS=[["all","すべて"],["__g_wa","🍚和"],["__g_yo","🍞洋"],["__g_it","🍝伊"],["__g_ch","🥟中"],["__g_kr","🌶️韓"],["__g_et","🍛エスニック"],["__fav","❤️お気に入り"],["__fish","🐟魚"],["__make","🍱作り置き"],["__bento","🍙お弁当"],["__budget","💰節約"],["__buzz","🔥バズり"],["__quick","🕒時短"],["__diet","ヘルシー"],["shu","主菜"],["plate","ワンプレート"],["fuku","副菜"],["shiru","汁物"]];
+function isFav(id){ return (state.favorites||[]).includes(id); }
+function toggleFav(id){
+  const i=state.favorites.indexOf(id);
+  if(i>=0) state.favorites.splice(i,1); else state.favorites.push(id);
+  save(); renderRecipes(); renderTasteHint();
+}
+function renderFilter(){
+  document.getElementById("rFilter").innerHTML = FILTERS.map(([k,l])=>
+    `<div class="chip ${rFilter===k?'on':''}" data-k="${k}">${l}</div>`).join("");
+  document.querySelectorAll("#rFilter .chip").forEach(c=>c.onclick=()=>{rFilter=c.dataset.k;renderFilter();renderRecipes();});
+}
+let fridgeQuery="";
+function renderRecipes(){
+  let list=RECIPES.slice();
+  const matchMap={};
+  const q=fridgeQuery.trim();
+  if(q){
+    // 余り物検索：入力食材がいくつ材料に含まれるかで絞り込み＆並べ替え
+    const toks=q.split(/[\s,、　]+/).filter(Boolean);
+    list = list.map(r=>{
+      const text=r.ing.map(i=>i.n).join(",");
+      const m=toks.filter(t=>text.includes(t)).length;
+      matchMap[r.id]=m;
+      return {r,m};
+    }).filter(x=>x.m>0).sort((a,b)=>b.m-a.m).map(x=>x.r);
+  } else {
+    if(rFilter==="__diet") list=list.filter(r=>r.tags.includes("ヘルシー"));
+    else if(rFilter==="__fish") list=list.filter(r=>r.tags.includes("さかな"));
+    else if(rFilter==="__quick") list=list.filter(r=>r.tags.includes("時短"));
+    else if(rFilter==="__buzz") list=list.filter(r=>r.tags.includes("バズり"));
+    else if(rFilter==="__make") list=list.filter(r=>r.tags.includes("作り置き"));
+    else if(rFilter==="__bento") list=list.filter(r=>r.tags.includes("お弁当"));
+    else if(rFilter==="__budget") list=list.filter(r=>isBudget(r));
+    else if(rFilter==="__fav") list=list.filter(r=>isFav(r.id));
+    else if(rFilter.startsWith("__g_")) list=list.filter(r=>recipeGenre(r)===rFilter.slice(4));
+    else if(rFilter!=="all") list=list.filter(r=>r.cat===rFilter);
+  }
+  if(q && !list.length){
+    document.getElementById("recipeList").innerHTML=`<div class="empty"><div class="big">🧊</div>「${q}」を使うレシピは見つかりませんでした。<br>食材名を変えてみてください。</div>`;
+    return;
+  }
+  if(rFilter==="__fav" && !list.length){
+    document.getElementById("recipeList").innerHTML=`<div class="empty"><div class="big">🤍</div>お気に入りはまだありません。<br>レシピ右上の♡を押すと登録できます。</div>`;
+    return;
+  }
+  document.getElementById("recipeList").innerHTML = list.map(r=>{
+    const ex=isExcluded(r);
+    return `<div class="rcard${ex?' excluded':''}">
+      <button class="fav ${isFav(r.id)?'on':''}" onclick="toggleFav('${r.id}')" title="お気に入り">${isFav(r.id)?'❤️':'🤍'}</button>
+      <div class="rt">${recipeEmoji(r)} ${r.name}${matchMap[r.id]?`<span class="matchbadge">${matchMap[r.id]}個一致</span>`:''}${ex?'<span class="exbadge">除外中</span>':''}${isBudget(r)?'<span class="savemark">💰節約</span>':''}</div>
+      <div class="ri">${CAT_LABEL[r.cat]} ・ 約${r.kcal}kcal/人 ・ ${r.time}分${r.maker?" ・ 🏭 "+r.maker:""}</div>
+      <div style="margin-top:4px">${algBadges(r)}</div>
+      <div class="rtags" style="margin-top:4px">${r.tags.map(t=>`<span>${t}</span>`).join("")}</div>
+      <details class="tw"><summary>${state.solo?"材料・作り方を見る":"材料・作り方・取り分けを見る"}</summary>
+        <div class="body">
+          <b>材料(4人分)：</b>${r.ing.map(i=>i.n+" "+fmtAmt(i.a,i.u)).join("、")}
+          ${stepsHtml(r.id)}
+          <div style="margin-top:7px"><b>${state.solo?"💡 保存・メモ":"👶 取り分け"}：</b>${r.torrwake}</div>
+        </div></details>
+    </div>`;
+  }).join("")
+    + `<p class="note">全${RECIPES.length}レシピ ＋ 朝食${BREAKFAST.length}品収録</p>`;
+}
+
+/* ===================== 冷蔵庫の食材で献立を組む ===================== */
+function ingText(r){ return (r.ing||[]).map(i=>i.n).join(","); }
+function buildCombo(reshuffle){
+  const el=document.getElementById("comboResult");
+  const q=(document.getElementById("fridge").value||"").trim();
+  const toks=q.split(/[\s,、　]+/).filter(Boolean);
+  if(!toks.length){ el.innerHTML=`<div class="lead" style="margin:0 0 10px">↑の欄に冷蔵庫の食材を入れてから押してください（例：なす 豚 卵）。使える組み合わせを提案します。</div>`; return; }
+  const uses=r=>toks.filter(t=>ingText(r).includes(t));
+  const cand=cat=>RECIPES.filter(r=>r.cat===cat&&!isExcluded(r)).map(r=>({r,u:uses(r)})).filter(x=>x.u.length>0);
+  // covered=すでに使う食材。新規カバーが多い順→総マッチ多い順。組み直しは上位からランダム。
+  const pickTop=(arr,covered)=>{
+    if(!arr.length) return null;
+    const scored=arr.map(x=>({r:x.r,u:x.u,nu:x.u.filter(t=>!covered.has(t)).length}))
+      .sort((a,b)=>b.nu-a.nu || b.u.length-a.u.length);
+    const topN = reshuffle ? scored.slice(0, Math.min(4,scored.length)) : scored.filter(x=>x.nu===scored[0].nu);
+    return topN[Math.floor(Math.random()*topN.length)];
+  };
+  const covered=new Set(), chosen=[];
+  const mains=cand("shu").concat(cand("plate"));
+  const main=pickTop(mains,covered); if(main){ chosen.push(["主菜",main]); main.u.forEach(t=>covered.add(t)); }
+  const isPlate=main && main.r.cat==="plate";
+  const side=pickTop(cand("fuku").filter(x=>!main||x.r.id!==main.r.id),covered); if(side){ chosen.push(["副菜",side]); side.u.forEach(t=>covered.add(t)); }
+  if(!isPlate){ const soup=pickTop(cand("shiru"),covered); if(soup){ chosen.push(["汁物",soup]); soup.u.forEach(t=>covered.add(t)); } }
+  if(!chosen.length){ el.innerHTML=`<div class="empty" style="padding:24px"><div class="big">🧊</div>「${toks.join("・")}」を使うレシピが見つかりませんでした。<br>食材名を変えてみてください。</div>`; return; }
+  const leftover=toks.filter(t=>!covered.has(t));
+  const tcls={主菜:'t-shu',副菜:'t-fuku',汁物:'t-shiru'};
+  el.innerHTML=`<div class="card" style="border-left:4px solid var(--green);margin-bottom:12px">
+    <b>🍳 この食材で組んだ献立</b>
+    <div class="ri" style="margin:4px 0 8px">入力${toks.length}種のうち <b>${covered.size}種</b> を使用${leftover.length?`（未使用：${leftover.join("・")}）`:"（全部使えます！）"}
+      <button class="reroll" style="float:right" onclick="buildCombo(true)" title="別の組み合わせ">🔄 組み直す</button></div>
+    ${chosen.map(([lab,x])=>`<div class="dish">
+      <span class="tag ${tcls[lab]}">${lab}</span>
+      <div class="nm">${recipeEmoji(x.r)} ${x.r.name}
+        <span class="meta">使う食材：${x.u.join("・")} ・ 約${x.r.kcal}kcal/人 ・ ${x.r.time}分</span>
+        <details class="tw"><summary>材料・作り方</summary><div class="body"><b>材料(4人分)：</b>${x.r.ing.map(i=>i.n+" "+fmtAmt(i.a,i.u)).join("、")}${stepsHtml(x.r.id)}</div></details>
+      </div></div>`).join("")}
+  </div>`;
+}
+
+/* ===================== タブ切替 ===================== */
+document.querySelectorAll(".tabbar button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".tabbar button").forEach(x=>x.classList.remove("on"));
+    document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    document.getElementById(b.dataset.p).classList.add("on");
+    if(b.dataset.p==="p-shop") renderShop();
+    if(b.dataset.p==="p-nutri") renderNutri();
+    if(b.dataset.p==="p-asa") renderBreakfast();
+    window.scrollTo(0,0);
+  };
+});
+
+/* ===================== 月齢ガイド ===================== */
+function renderAgeTip(){
+  const sel=document.getElementById("ageSel");
+  if(!sel.options.length){
+    sel.innerHTML = AGE_STAGES.map(s=>`<option value="${s.key}">${s.label}</option>`).join("");
+  }
+  sel.value=state.stage;
+  const s=AGE_STAGES.find(a=>a.key===state.stage);
+  const tip=document.getElementById("ageTip");
+  if(!s || s.key==="none"){ tip.innerHTML=""; return; }
+  tip.innerHTML=`<div class="agetip">
+    <b>${s.label} の取り分け目安</b>
+    <div class="gline">🥄 <b>固さ</b>：${s.fast}</div>
+    <div class="gline">🔪 <b>大きさ</b>：${s.size}</div>
+    <div class="gline">📝 ${s.note}</div>
+  </div>`;
+}
+
+/* ===================== アレルギー除外チップ ===================== */
+function renderAllergyChips(){
+  document.getElementById("algChips").innerHTML = ALLERGENS.map(a=>
+    `<div class="algchip ${state.allergy.includes(a.key)?'on':''}" data-k="${a.key}">${a.label}</div>`).join("");
+  document.querySelectorAll("#algChips .algchip").forEach(c=>c.onclick=()=>{
+    const k=c.dataset.k;
+    const i=state.allergy.indexOf(k);
+    if(i>=0) state.allergy.splice(i,1); else state.allergy.push(k);
+    save(); renderAllergyChips(); renderRecipes();
+  });
+}
+
+/* ===================== イベント ===================== */
+document.getElementById("gen").onclick=()=>{ generateWeek(); renderWeek(); };
+document.getElementById("genAsa").onclick=()=>{ genBreakfast(); renderBreakfast(); };
+document.getElementById("dietMode").checked = state.diet;
+document.getElementById("dietMode").onchange=e=>{ state.diet=e.target.checked; save(); };
+document.getElementById("budgetMode").checked = state.budget;
+document.getElementById("budgetMode").onchange=e=>{ state.budget=e.target.checked; save(); };
+document.getElementById("avoidRep").checked = state.avoidRepeat;
+document.getElementById("avoidRep").onchange=e=>{ state.avoidRepeat=e.target.checked; save(); };
+document.getElementById("soloMode").checked = state.solo;
+document.getElementById("soloMode").onchange=e=>{
+  state.solo=e.target.checked;
+  if(state.solo){ state.servings=1; const ss=document.getElementById("servSel"); if(ss) ss.value=1; }
+  save(); applySolo(); renderWeek(); renderBreakfast(); renderRecipes(); pickMood();
+};
+document.getElementById("learnMode").checked = state.learn;
+document.getElementById("learnMode").onchange=e=>{ state.learn=e.target.checked; save(); renderTasteHint(); };
+(function initServ(){
+  const sel=document.getElementById("servSel");
+  sel.innerHTML=[1,2,3,4,5,6,8].map(n=>`<option value="${n}">${n}人分</option>`).join("");
+  sel.value=state.servings;
+  sel.onchange=e=>{ state.servings=parseInt(e.target.value,10); save(); renderShop(); };
+})();
+document.getElementById("uncheckAll").onclick=()=>{ state.checked={}; save(); renderShop(); };
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1600);
+}
+function shopText(){
+  const map=aggregateIngredients();
+  const order=["veg","meat","egg","stap","season","other"];
+  let s="🛒 買い物リスト（"+(state.servings||4)+"人分×7日 夕食）\n食材費の目安：約"+yen(weeklyCost())+"\n";
+  order.filter(g=>map[g]).forEach(g=>{
+    s+="\n【"+ING_GROUPS[g].replace(/^[^ ]+ /,"")+"】\n";
+    Object.values(map[g]).sort((a,b)=>a.n.localeCompare(b.n,'ja')).forEach(it=>{
+      s+="・"+it.n+" "+fmtAmt(it.a,it.u)+"\n";
+    });
+  });
+  return s;
+}
+document.getElementById("copyShop").onclick=async()=>{
+  if(!state.week){ toast("先に献立を作ってください"); return; }
+  const txt=shopText();
+  try{ await navigator.clipboard.writeText(txt); toast("📋 買い物リストをコピーしました"); }
+  catch(e){
+    // クリップボード不可の環境向けフォールバック
+    const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand("copy"); toast("📋 コピーしました"); }catch(_){ toast("コピーできませんでした"); }
+    document.body.removeChild(ta);
+  }
+};
+document.getElementById("printShop").onclick=()=>{
+  if(!state.week){ toast("先に献立を作ってください"); return; }
+  window.print();
+};
+document.getElementById("ageSel").onchange=e=>{ state.stage=e.target.value; save(); renderAgeTip(); };
+document.getElementById("fridge").oninput=e=>{ fridgeQuery=e.target.value; renderRecipes(); };
+document.getElementById("comboBtn").onclick=()=>buildCombo(false);
+
+// 苦手な食材
+const dislikeInput=document.getElementById("dislikeInput");
+dislikeInput.value=(state.dislikes||[]).join("、");
+dislikeInput.oninput=e=>{ state.dislikes=e.target.value.split(/[\s,、　]+/).filter(Boolean); save(); renderRecipes(); };
+
+// データのバックアップ
+document.getElementById("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download="kondate-backup.json"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast("💾 バックアップを書き出しました");
+};
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ const obj=JSON.parse(rd.result); if(typeof obj!=="object") throw 0; state=Object.assign(state,obj); save(); toast("💾 読み込みました"); setTimeout(()=>location.reload(),700); }catch(_){ toast("読み込めませんでした"); } };
+  rd.readAsText(f);
+};
+
+/* ===================== 初期化 ===================== */
+renderAgeTip(); renderAllergyChips(); renderFilter(); renderMoodChips(); applySolo(); renderTasteHint(); renderRecipes(); renderWeek();
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('service-worker.js').catch(()=>{}); }
+</script>
